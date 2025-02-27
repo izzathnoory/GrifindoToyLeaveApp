@@ -42,7 +42,6 @@ namespace GrifindoToyLeaveApp
             admin._loadTable = AdminSqlDataView;
         }
 
-
         private void loadDataFromDB()
         {
             admin.LoadData(AdminSqlDataView);
@@ -53,7 +52,8 @@ namespace GrifindoToyLeaveApp
             // get row index from data gridview
             int RowIndeNumber = e.RowIndex;
 
-            if(RowIndeNumber >= 0) {
+            if(RowIndeNumber >= 0) 
+            {
                 // get data and store in the  variable by using selected row index
                 string id = AdminSqlDataView.Rows[RowIndeNumber].Cells["ID"].Value.ToString();
                 string employee = AdminSqlDataView.Rows[RowIndeNumber].Cells["Name"].Value.ToString();

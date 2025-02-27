@@ -15,8 +15,6 @@ namespace GrifindoToyLeaveApp.AppClass
 
         public bool Login()
         {
-            /*string sql_data = $"SELECT * FROM leave_req_table req JOIN leave_type_table leatype ON leatype.leave_type_id = req.leave_type_fk" +
-            $" JOIN employee_table em ON em.emp_num = leatype.employee_fk WHERE em.Emp_num = '{username}' AND em.password = '{password}'";*/
 
             string sql_data = $"select *from Leave_Type_Table type join Employee_Table emp on emp.Emp_num = type.employee_fk where emp.Emp_num = '"+username+"' and emp.password =  '"+password+"'";
             DataTable dt = ExecuteQuery(sql_data);

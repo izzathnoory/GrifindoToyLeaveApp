@@ -79,6 +79,7 @@
             this.UsernameTxt.Size = new System.Drawing.Size(228, 54);
             this.UsernameTxt.TabIndex = 1;
             this.UsernameTxt.Text = "Loading...";
+            this.UsernameTxt.Click += new System.EventHandler(this.UsernameTxt_Click);
             // 
             // label4
             // 

@@ -21,7 +21,6 @@ namespace GrifindoToyLeaveApp.AppClass
         internal string OffDay { get; set; }
         internal string HalfDay { get; set;}
         internal string MorningHalfDay {  get; set; }
-
         internal DataGridView _loadTable { get; set; }
 
         public void Save()

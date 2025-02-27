@@ -95,7 +95,6 @@ namespace GrifindoToyLeaveApp
                     Reasontxt.Text = reason;
                     LeaveBegDaDTP.Text = begindate;
                     LeaveEndDaDTP.Text = enddate;
-
                     empRequestLeave.LeaveStatus = _leaveStatus;
                     enableStatus(_leaveStatus);
 

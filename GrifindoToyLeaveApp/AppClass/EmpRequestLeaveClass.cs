@@ -21,9 +21,7 @@ namespace GrifindoToyLeaveApp.AppClass
         internal DateTime ShortLeaveTime { get; set; }
         internal string LeaveType { get; set; }
         internal string LeaveStatus { get; set; }
-        
         internal double LeaveCount { get; set; }
-
         internal DataGridView _loadTable {  get; set; }
         internal List<DateTime> LeaveDates { get; set; } = new List<DateTime>();
 

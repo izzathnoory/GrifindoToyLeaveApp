@@ -63,5 +63,10 @@ namespace GrifindoToyLeaveApp
         {
             return username.Equals("admin", StringComparison.OrdinalIgnoreCase);
         }
+
+        private void UsernameTxt_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
