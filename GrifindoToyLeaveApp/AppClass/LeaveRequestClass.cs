@@ -24,7 +24,6 @@ namespace GrifindoToyLeaveApp.AppClass
         internal string LeaveType { get; set;}
         internal DateTime ShortLeaveTime { get; set;}
         internal int OffDayCount { get; set; }
-
         internal double HalfDayCount { get; set; }
         internal double LeavesTaken { get; set; }
 

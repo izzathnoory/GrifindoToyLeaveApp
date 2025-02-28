@@ -24,6 +24,13 @@ namespace GrifindoToyLeaveApp.AppClass
         internal double LeaveCount { get; set; }
         internal DataGridView _loadTable {  get; set; }
         internal List<DateTime> LeaveDates { get; set; } = new List<DateTime>();
+        internal int OffDayCount { get; set; }
+        internal double HalfDayCount { get; set; }
+        internal double LeavesTaken { get; set; }
+
+        private EmployeeRoasterClass empRoas = new EmployeeRoasterClass();
+
+        EmployeeDetailStoreClass employeeDetailStore = new EmployeeDetailStoreClass();
 
 
         public void save()

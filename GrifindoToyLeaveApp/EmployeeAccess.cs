@@ -35,12 +35,15 @@ namespace GrifindoToyLeaveApp
         private void LeaveRequestBtn_Click(object sender, EventArgs e)
         {
             UserInterface.ChangeButtonColor(sender as Button);
-            UserInterface.LoadPanelForm(new EmpRequestLeave(), EmployeeAccessMainPanel);
+            int currentEmployeeId = CurrentUser.EmployeeId;
+            UserInterface.LoadPanelForm(new EmpRequestLeave(currentEmployeeId), EmployeeAccessMainPanel);
         }
 
         internal void trigerLeaveRequestButtonClick()
         {
-            UserInterface.LoadPanelForm(new EmpRequestLeave(), EmployeeAccessMainPanel);
+            int currentEmployeeId = CurrentUser.EmployeeId;
+            UserInterface.LoadPanelForm(new EmpRequestLeave(currentEmployeeId), EmployeeAccessMainPanel);
+
         }
 
         private void Dashboardbtn_Click(object sender, EventArgs e)
