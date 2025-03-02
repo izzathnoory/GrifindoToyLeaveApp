@@ -103,37 +103,38 @@ namespace GrifindoToyLeaveApp
         private void LeavReqInserbtn_Click(object sender, EventArgs e)
         {
 
-            //empRequestLeave.save();
             try
             {
-                // Get the start and end dates from the DateTimePickers
                 DateTime startDate = LeaveBegDaDTP.Value.Date;
                 DateTime endDate = LeaveEndDaDTP.Value.Date;
                 DateTime currentDate = DateTime.Now.Date;
 
-                // Fetch the employee's work start time using their employee ID
                 var (employeeStartTime, employeeEndTime) = employeeRoaster.GetWorkTimesByEmployeeId(_currentEmployeeId);
                 TimeSpan currentTime = DateTime.Now.TimeOfDay;
 
-                // Check if the leave type is "Casual" or "Short" and block leave if it's during working hours
                 if ((empRequestLeave.LeaveType == "Casual" || empRequestLeave.LeaveType == "Short") &&
                 currentTime > employeeStartTime && currentTime < employeeEndTime)
                 {
                     MessageBox.Show($"You must request leave before your work starts.", "Invalid Leave Request");
-                    return; // Block the leave request
+                    return;
                 }
 
-                // Ensure that the employee's off day and half day have been set
                 if (string.IsNullOrEmpty(employeeoffDay) || string.IsNullOrEmpty(employeehalfDay))
                 {
                     MessageBox.Show("Employee's off day or half day is not set. Please select a valid leave type.");
                     return;
                 }
 
-                // Get the day names between the selected start and end dates
+                // Assigning employeeoffDay to selectedEmployeeoffDay
+                selectedEmployeeoffDay = employeeoffDay;
+                selectedEmployeehalfDay = employeehalfDay;
+
                 List<string> dayNamesBetween = GetDayNamesBetween(startDate, endDate);
 
-                // Count the number of off days in the selected leave period
+                // Debugging statements
+                string debugMessage = $"Selected Off Day: {selectedEmployeeoffDay}\nSelected Half Day: {selectedEmployeehalfDay}\nDays Between: {string.Join(", ", dayNamesBetween)}";
+                MessageBox.Show(debugMessage, "Debug Info");
+
                 int offDayCount = dayNamesBetween.Count(day => day.Equals(selectedEmployeeoffDay, StringComparison.OrdinalIgnoreCase));
                 double halfDayCount = dayNamesBetween.Count(day => day.Equals(selectedEmployeehalfDay, StringComparison.OrdinalIgnoreCase)) * 0.5;
 
@@ -143,36 +144,24 @@ namespace GrifindoToyLeaveApp
                 empRequestLeave.HalfDayCount = halfDayCount;
                 empRequestLeave.LeavesTaken = totalLeaveDays - (offDayCount + halfDayCount);
 
-                // Store the count of off days in a variable and display in a message box
-                MessageBox.Show($"Off Day Count: {offDayCount}", "Off Day Count");
+                MessageBox.Show($"Half Day Count: {halfDayCount}", "Half Day Count");
 
-                // If the start and end dates are the same, check if it falls on the employee's off day
-                if (startDate == endDate && dayNamesBetween.Contains(selectedEmployeeoffDay))
-                {
-                    MessageBox.Show("Your allocated leave is exhausted. You can take a leave next year.");
-                    return; // Block the leave request for a single off day
-                }
-
-                // Check if there is only one off day in the leave period, block if true
                 if (offDayCount == 1)
                 {
                     MessageBox.Show("Sorry, you cannot request leave on your off day. There is only one off day in the selected period.");
-                    return; // Exit the method if there's a conflict
+                    return;
                 }
-                // If there are multiple off days, allow the leave request to proceed
                 else if (offDayCount > 1)
                 {
                     MessageBox.Show("Multiple off days detected, leave request allowed.");
                 }
 
-                // Check if the leave type is "Annual" and validate the date
                 if (empRequestLeave.LeaveType == "Annual" && !IsAnnualLeaveValid(startDate, currentDate))
                 {
-                    MessageBox.Show("Your allocated leave is exhausted. You can take a leave next year.");
-                    return; // Exit if annual leave does not meet the 7-day condition
+                    MessageBox.Show("Annual leave must be requested at least 7 days in advance");
+                    return;
                 }
 
-                // No conflicts, proceed to save the leave request
                 empRequestLeave.save();
             }
             catch (Exception ex)
