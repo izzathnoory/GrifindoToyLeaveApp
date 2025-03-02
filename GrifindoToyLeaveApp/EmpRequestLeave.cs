@@ -153,10 +153,16 @@ namespace GrifindoToyLeaveApp
                     return; // Block the leave request for a single off day
                 }
 
-                // Check if there are multiple off days in the leave period and allow the leave
-                if (offDayCount > 0)
+                // Check if there is only one off day in the leave period, block if true
+                if (offDayCount == 1)
                 {
-                    MessageBox.Show("Off days detected, leave request allowed with off days counted.");
+                    MessageBox.Show("Sorry, you cannot request leave on your off day. There is only one off day in the selected period.");
+                    return; // Exit the method if there's a conflict
+                }
+                // If there are multiple off days, allow the leave request to proceed
+                else if (offDayCount > 1)
+                {
+                    MessageBox.Show("Multiple off days detected, leave request allowed.");
                 }
 
                 // Check if the leave type is "Annual" and validate the date
