@@ -47,6 +47,25 @@ namespace GrifindoToyLeaveApp
             LeaveType.LoadData(LeaTypSqlDataView);
         }
 
+        public void DeductLeave(string leaveType, double leavesTaken)
+        {
+            switch (leaveType)
+            {
+                case "Annual":
+                    LeaveType.AnnualLeave = (int.Parse(LeaveType.AnnualLeave) - (int)leavesTaken).ToString();
+                    break;
+                case "Casual":
+                    LeaveType.CasualLeave = (int.Parse(LeaveType.CasualLeave) - (int)leavesTaken).ToString();
+                    break;
+                case "Short":
+                    LeaveType.ShortLeave = (int.Parse(LeaveType.ShortLeave) - (int)leavesTaken).ToString();
+                    break;
+                default:
+                    throw new Exception("Invalid leave type");
+            }
+            LeaveType.Update(); // Assuming there's an Update method in LeaveTypeClass to save changes
+        }
+
         private void LeaTypSqlDataView_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             // get row index from data gridview
