@@ -102,17 +102,20 @@ namespace GrifindoToyLeaveApp
 
         private void LeavReqInserbtn_Click(object sender, EventArgs e)
         {
-
             try
             {
                 DateTime startDate = LeaveBegDaDTP.Value.Date;
                 DateTime endDate = LeaveEndDaDTP.Value.Date;
                 DateTime currentDate = DateTime.Now.Date;
 
-                var (employeeStartTime, employeeEndTime) = employeeRoaster.GetWorkTimesByEmployeeId(_currentEmployeeId);
+                var (employeeStartTime, employeeEndTime) = employeeRoaster.GetWorkTimesByEmployeeId(EmpUserAuthonticationClass.Id);
                 TimeSpan currentTime = DateTime.Now.TimeOfDay;
 
+                // Debug messages
+                MessageBox.Show($"Current Date: {currentDate}\nStart Date: {startDate}\nCurrent Time: {currentTime}\nEmployee Start Time: {employeeStartTime}", "Debug Info");
+
                 if ((empRequestLeave.LeaveType == "Casual" || empRequestLeave.LeaveType == "Short") &&
+                //currentDate == startDate && currentTime > employeeStartTime)
                 currentTime > employeeStartTime && currentTime < employeeEndTime)
                 {
                     MessageBox.Show($"You must request leave before your work starts.", "Invalid Leave Request");
