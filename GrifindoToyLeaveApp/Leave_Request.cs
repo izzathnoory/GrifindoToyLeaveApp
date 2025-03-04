@@ -105,79 +105,88 @@ namespace GrifindoToyLeaveApp
         {
             try
             {
-                // Get the start and end dates from the DateTimePickers
+                if (string.IsNullOrEmpty(leaveRequest.LeaveType))
+                {
+                    MessageBox.Show("Leave type cannot be empty.", "Validation Error");
+                    return;
+                }
+                if (string.IsNullOrEmpty(leaveRequest.Reason))
+                {
+                    MessageBox.Show("Reason cannot be empty.", "Validation Error");
+                    return;
+                }
+
                 DateTime startDate = LeaveBegDaDTP.Value.Date;
                 DateTime endDate = LeaveEndDaDTP.Value.Date;
                 DateTime currentDate = DateTime.Now.Date;
 
-                // Fetch the employee's work start time using their employee ID
                 var (employeeStartTime, employeeEndTime) = employeeRoaster.GetWorkTimesByEmployeeId(_currentEmployeeId);
                 TimeSpan currentTime = DateTime.Now.TimeOfDay;
 
-                // Check if the leave type is "Casual" or "Short" and block leave if it's during working hours
                 if ((leaveRequest.LeaveType == "Casual" || leaveRequest.LeaveType == "Short") &&
                 currentTime > employeeStartTime && currentTime < employeeEndTime)
                 {
                     MessageBox.Show($"You must request leave before your work starts.", "Invalid Leave Request");
-                    return; // Block the leave request
-                }
-
-                // Ensure that the employee's off day and half day have been set
-                if (string.IsNullOrEmpty(employeeOffDay) || string.IsNullOrEmpty(employeeHalfDay))
-                {
-                    MessageBox.Show("Employee's off day or half day is not set. Please select a valid leave type.");
                     return;
                 }
 
-                // Get the day names between the selected start and end dates
+                if (string.IsNullOrEmpty(employeeOffDay))
+                {
+                    MessageBox.Show("Employee's off day is not set. Please select a valid leave type.");
+                    return;
+                }
+                if (string.IsNullOrEmpty(employeeHalfDay))
+                {
+                    MessageBox.Show("Employee's half day is not set. Please select a valid leave type.");
+                    return;
+                }
+
                 List<string> dayNamesBetween = GetDayNamesBetween(startDate, endDate);
 
-                // Count the number of off days in the selected leave period
                 int offDayCount = dayNamesBetween.Count(day => day.Equals(selectedEmployeeOffDay, StringComparison.OrdinalIgnoreCase));
                 double halfDayCount = dayNamesBetween.Count(day => day.Equals(selectedEmployeeHalfDay, StringComparison.OrdinalIgnoreCase)) * 0.5;
-
                 double totalLeaveDays = (endDate - startDate).Days + 1;
 
                 leaveRequest.OffDayCount = offDayCount;
                 leaveRequest.HalfDayCount = halfDayCount;
                 leaveRequest.LeavesTaken = totalLeaveDays - (offDayCount + halfDayCount);
 
-                // Store the count of off days in a variable and display in a message box
-                MessageBox.Show($"Off Day Count: {offDayCount}", "Off Day Count");
+                MessageBox.Show($"Leaves Taken: {leaveRequest.LeavesTaken}\nOff Day Count: {offDayCount}\nHalf Day Count: {halfDayCount}\nTotal Leave Days: {totalLeaveDays}", "Debug Info");
 
-                // If the start and end dates are the same, check if it falls on the employee's off day
                 if (startDate == endDate && dayNamesBetween.Contains(selectedEmployeeOffDay))
                 {
                     MessageBox.Show("Your allocated leave is exhausted. You can take a leave next year.");
-                    return; // Block the leave request for a single off day
+                    return;
                 }
 
-                // Check if there are multiple off days in the leave period and allow the leave
                 if (offDayCount > 0)
                 {
                     MessageBox.Show("Off days detected, leave request allowed with off days counted.");
                 }
 
-                // Check if the leave type is "Annual" and validate the date
                 if (leaveRequest.LeaveType == "Annual" && !IsAnnualLeaveValid(startDate, currentDate))
                 {
                     MessageBox.Show("Your allocated leave is exhausted. You can take a leave next year.");
-                    return; // Exit if annual leave does not meet the 7-day condition
+                    return;
                 }
 
-                // Calculate the remaining available leave
-                int availableLeave = int.Parse(leavetype.GetAvailableLeave(leaveRequest.LeaveType));
+                string availableLeaveStr = leavetype.GetAvailableLeave(leaveRequest.LeaveType); // Correct method call
+                if (string.IsNullOrEmpty(availableLeaveStr))
+                {
+                    MessageBox.Show("Available leave information is missing.", "Validation Error");
+                    return;
+                }
 
-                // Check if the total leave taken exceeds the allowed leave count
+                int availableLeave = int.Parse(availableLeaveStr);
+                MessageBox.Show($"Available Leave: {availableLeave}", "Debug Info");
+
                 if (leaveRequest.LeavesTaken > availableLeave)
                 {
                     MessageBox.Show("Your leave request exceeds the allowed leave count. Please adjust your leave days.");
-                    return; // Block the leave request if it exceeds the allowed leave count
+                    return;
                 }
 
-                // No conflicts, proceed to save the leave request
                 leaveRequest.save();
-                //LeaveTypeClass leaveTypeManager = new LeaveTypeClass();
                 leavetype.DeductLeave(leaveRequest.LeaveType, leaveRequest.LeavesTaken);
             }
             catch (Exception ex)

@@ -20,7 +20,16 @@ namespace GrifindoToyLeaveApp
         public Leave_Type()
         {
             InitializeComponent();
+            InitializeLeaveTypeProperties(); // Initialize properties
         }
+
+        private void InitializeLeaveTypeProperties()
+        {
+            LeaveType.AnnualLeave = LeaveType.AnnualLeave ?? "0";
+            LeaveType.CasualLeave = LeaveType.CasualLeave ?? "0";
+            LeaveType.ShortLeave = LeaveType.ShortLeave ?? "0";
+        }
+
 
         private void Insertbtn_Click(object sender, EventArgs e)
         {

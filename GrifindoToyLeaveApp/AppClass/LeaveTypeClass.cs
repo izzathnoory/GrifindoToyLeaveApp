@@ -100,28 +100,23 @@ namespace GrifindoToyLeaveApp.AppClass
             int casual = 0;
             int shortLeave = 0;
 
-            // Query to get the leave counts
             string query = "SELECT annua_leav_count, casu_leav_count, short_leave FROM Leave_Type_Table WHERE employee_fk = @employee_fk";
 
-            using (SqlCommand cmd = new SqlCommand(query, conn)) // Using the 'conn' from the parent SQL class
+            using (SqlCommand cmd = new SqlCommand(query, conn))
             {
-                // Parameterized query to prevent SQL injection
                 cmd.Parameters.AddWithValue("@employee_fk", employeeId);
 
                 try
                 {
-                    // Open the connection if it's not already open
                     if (conn.State == ConnectionState.Closed)
                     {
                         conn.Open();
                     }
 
-                    // Execute the query and process the result
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            // Read and convert values from the database, handling null values
                             annual = reader["annua_leav_count"] != DBNull.Value ? Convert.ToInt32(reader["annua_leav_count"]) : 0;
                             casual = reader["casu_leav_count"] != DBNull.Value ? Convert.ToInt32(reader["casu_leav_count"]) : 0;
                             shortLeave = reader["short_leave"] != DBNull.Value ? Convert.ToInt32(reader["short_leave"]) : 0;
@@ -134,7 +129,6 @@ namespace GrifindoToyLeaveApp.AppClass
                 }
                 finally
                 {
-                    // Ensure the connection is closed
                     if (conn.State == ConnectionState.Open)
                     {
                         conn.Close();
@@ -142,8 +136,24 @@ namespace GrifindoToyLeaveApp.AppClass
                 }
             }
 
-            // Return the leave counts as a tuple
             return (annual, casual, shortLeave);
+        }
+
+        public string GetAvailableLeave(string leaveType, int employeeId)
+        {
+            var (annual, casual, shortLeave) = GetDaysByEmployeeId(employeeId);
+
+            switch (leaveType)
+            {
+                case "Annual":
+                    return annual.ToString();
+                case "Casual":
+                    return casual.ToString();
+                case "Short":
+                    return shortLeave.ToString();
+                default:
+                    throw new Exception("Invalid leave type");
+            }
         }
 
 
