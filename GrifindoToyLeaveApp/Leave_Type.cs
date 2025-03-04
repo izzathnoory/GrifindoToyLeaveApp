@@ -56,23 +56,31 @@ namespace GrifindoToyLeaveApp
             LeaveType.LoadData(LeaTypSqlDataView);
         }
 
-        public void DeductLeave(string leaveType, double leavesTaken)
+        public void DeductLeave(string leaveType, double leavesTaken, int employeeId)
         {
+            // Fetch current leave balances for the employee
+            var (annual, casual, shortLeave) = LeaveType.GetDaysByEmployeeId(employeeId);
+
             switch (leaveType)
             {
                 case "Annual":
-                    LeaveType.AnnualLeave = (int.Parse(LeaveType.AnnualLeave) - (int)leavesTaken).ToString();
+                    annual -= (int)leavesTaken;
+                    LeaveType.AnnualLeave = annual.ToString();
                     break;
                 case "Casual":
-                    LeaveType.CasualLeave = (int.Parse(LeaveType.CasualLeave) - (int)leavesTaken).ToString();
+                    casual -= (int)leavesTaken;
+                    LeaveType.CasualLeave = casual.ToString();
                     break;
                 case "Short":
-                    LeaveType.ShortLeave = (int.Parse(LeaveType.ShortLeave) - (int)leavesTaken).ToString();
+                    shortLeave -= (int)leavesTaken;
+                    LeaveType.ShortLeave = shortLeave.ToString();
                     break;
                 default:
                     throw new Exception("Invalid leave type");
             }
-            LeaveType.Update(); // Assuming there's an Update method in LeaveTypeClass to save changes
+
+            // Update the leave type record in the database
+            LeaveType.Update();
         }
 
         public string GetAvailableLeave(string leaveType)

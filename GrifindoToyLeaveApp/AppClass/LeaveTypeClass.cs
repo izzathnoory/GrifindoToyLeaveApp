@@ -94,6 +94,37 @@ namespace GrifindoToyLeaveApp.AppClass
             }
         }
 
+        //public void DeductLeave(string leaveType, double leavesTaken, int employeeId)
+        //{
+        //    // Fetch current leave balances for the employee
+        //    var (annual, casual, shortLeave) = GetDaysByEmployeeId(employeeId);
+
+        //    // Debugging: Display current leave balances
+        //    MessageBox.Show($"Before Deduction - Annual: {annual}, Casual: {casual}, Short: {shortLeave}", "Debug Info");
+
+        //    switch (leaveType)
+        //    {
+        //        case "Annual":
+        //            annual -= (int)leavesTaken;
+        //            break;
+        //        case "Casual":
+        //            casual -= (int)leavesTaken;
+        //            break;
+        //        case "Short":
+        //            shortLeave -= (int)leavesTaken;
+        //            break;
+        //        default:
+        //            throw new Exception("Invalid leave type");
+        //    }
+
+        //    // Debugging: Display updated leave balances
+        //    MessageBox.Show($"After Deduction - Annual: {annual}, Casual: {casual}, Short: {shortLeave}", "Debug Info");
+
+        //    // Update the leave type record in the database
+        //    string query = $"UPDATE Leave_Type_Table SET annua_leav_count = {annual}, casu_leav_count = {casual}, short_leave = {shortLeave} WHERE employee_fk = {employeeId}";
+        //    ExecuteUpdateQuery(query);
+        //}
+
         public (int Annual, int Casual, int Short) GetDaysByEmployeeId(int employeeId)
         {
             int annual = 0;
@@ -121,6 +152,10 @@ namespace GrifindoToyLeaveApp.AppClass
                             casual = reader["casu_leav_count"] != DBNull.Value ? Convert.ToInt32(reader["casu_leav_count"]) : 0;
                             shortLeave = reader["short_leave"] != DBNull.Value ? Convert.ToInt32(reader["short_leave"]) : 0;
                         }
+                        else
+                        {
+                            MessageBox.Show("No leave data found for the employee.", "Error");
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -137,6 +172,7 @@ namespace GrifindoToyLeaveApp.AppClass
             }
 
             return (annual, casual, shortLeave);
+
         }
 
         public string GetAvailableLeave(string leaveType, int employeeId)
