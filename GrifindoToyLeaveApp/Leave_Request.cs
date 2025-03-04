@@ -165,9 +165,18 @@ namespace GrifindoToyLeaveApp
                     return; // Exit if annual leave does not meet the 7-day condition
                 }
 
+                // Calculate the remaining available leave
+                int availableLeave = int.Parse(leavetype.GetAvailableLeave(leaveRequest.LeaveType));
+
+                // Check if the total leave taken exceeds the allowed leave count
+                if (leaveRequest.LeavesTaken > availableLeave)
+                {
+                    MessageBox.Show("Your leave request exceeds the allowed leave count. Please adjust your leave days.");
+                    return; // Block the leave request if it exceeds the allowed leave count
+                }
+
                 // No conflicts, proceed to save the leave request
                 leaveRequest.save();
-                // Deduct the allowed leave count
                 //LeaveTypeClass leaveTypeManager = new LeaveTypeClass();
                 leavetype.DeductLeave(leaveRequest.LeaveType, leaveRequest.LeavesTaken);
             }
