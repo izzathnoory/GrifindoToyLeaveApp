@@ -100,6 +100,30 @@ namespace GrifindoToyLeaveApp
             return dayNamesList; // Return the list of day names
         }
 
+        private void DisplayAvailableLeave(int employeeId)
+        {
+            try
+            {
+                string leaveTypeStr = leaveRequest.LeaveType; // Store the leave type string
+                LeaveTypeClass leaveTypeClass = new LeaveTypeClass(); // Initialize the LeaveTypeClass object
+
+                // Validate leave type before calling GetAvailableLeave
+                if (leaveTypeStr == "Annual" || leaveTypeStr == "Casual" || leaveTypeStr == "Short")
+                {
+                    string availableLeaveStr = leaveTypeClass.GetAvailableLeave(leaveTypeStr, employeeId); // Correct method call
+                    int availableLeave = int.Parse(availableLeaveStr);
+                    MessageBox.Show($"Available Leave for Employee {employeeId}: {availableLeave}", "Available Leave");
+                }
+                else
+                {
+                    MessageBox.Show("Invalid leave type selected. Please choose a valid leave type.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error fetching available leave: " + ex.Message);
+            }
+        }
 
         private void LeavReqInserbtn_Click(object sender, EventArgs e)
         {
@@ -151,35 +175,14 @@ namespace GrifindoToyLeaveApp
                 leaveRequest.HalfDayCount = halfDayCount;
                 leaveRequest.LeavesTaken = totalLeaveDays - (offDayCount + halfDayCount);
 
-                MessageBox.Show($"Leaves Taken: {leaveRequest.LeavesTaken}\nOff Day Count: {offDayCount}\nHalf Day Count: {halfDayCount}\nTotal Leave Days: {totalLeaveDays}", "Debug Info");
-
-                if (startDate == endDate && dayNamesBetween.Contains(selectedEmployeeOffDay))
+                string availableLeaveStr = leaveType.GetAvailableLeave(leaveRequest.LeaveType, _currentEmployeeId);
+                if (string.IsNullOrEmpty(availableLeaveStr) || availableLeaveStr == "0")
                 {
-                    MessageBox.Show("Your allocated leave is exhausted. You can take a leave next year.");
-                    return;
-                }
-
-                if (offDayCount > 0)
-                {
-                    MessageBox.Show("Off days detected, leave request allowed with off days counted.");
-                }
-
-                if (leaveRequest.LeaveType == "Annual" && !IsAnnualLeaveValid(startDate, currentDate))
-                {
-                    MessageBox.Show("Your allocated leave is exhausted. You can take a leave next year.");
-                    return;
-                }
-
-                string availableLeaveStr = leavetype.GetAvailableLeave(leaveRequest.LeaveType); // Correct method call
-                if (string.IsNullOrEmpty(availableLeaveStr))
-                {
-                    MessageBox.Show("Available leave information is missing.", "Validation Error");
+                    MessageBox.Show("Available leave is 0 or not set. Please check the leave type.");
                     return;
                 }
 
                 int availableLeave = int.Parse(availableLeaveStr);
-                MessageBox.Show($"Available Leave: {availableLeave}", "Debug Info");
-
                 if (leaveRequest.LeavesTaken > availableLeave)
                 {
                     MessageBox.Show("Your leave request exceeds the allowed leave count. Please adjust your leave days.");
@@ -315,69 +318,69 @@ namespace GrifindoToyLeaveApp
         {
             try
             {
-                // Get the start and end dates from the DateTimePickers
+                if (string.IsNullOrEmpty(leaveRequest.LeaveType))
+                {
+                    MessageBox.Show("Leave type cannot be empty.", "Validation Error");
+                    return;
+                }
+                if (string.IsNullOrEmpty(leaveRequest.Reason))
+                {
+                    MessageBox.Show("Reason cannot be empty.", "Validation Error");
+                    return;
+                }
+
                 DateTime startDate = LeaveBegDaDTP.Value.Date;
                 DateTime endDate = LeaveEndDaDTP.Value.Date;
                 DateTime currentDate = DateTime.Now.Date;
 
-                // Fetch the employee's work start time using their employee ID
                 var (employeeStartTime, employeeEndTime) = employeeRoaster.GetWorkTimesByEmployeeId(_currentEmployeeId);
                 TimeSpan currentTime = DateTime.Now.TimeOfDay;
 
-
-                // Check if the leave type is "Casual" or "Short" and block leave if it's during working hours
                 if ((leaveRequest.LeaveType == "Casual" || leaveRequest.LeaveType == "Short") &&
                 currentTime > employeeStartTime && currentTime < employeeEndTime)
                 {
                     MessageBox.Show($"You must request leave before your work starts.", "Invalid Leave Request");
-                    return; // Block the leave request
-                }
-
-                // Ensure that the employee's off day and half day have been set
-                if (string.IsNullOrEmpty(employeeOffDay) || string.IsNullOrEmpty(employeeHalfDay))
-                {
-                    MessageBox.Show("Employee's off day or half day is not set. Please select a valid leave type.");
                     return;
                 }
 
-                // Get the day names between the selected start and end dates
+                if (string.IsNullOrEmpty(employeeOffDay))
+                {
+                    MessageBox.Show("Employee's off day is not set. Please select a valid leave type.");
+                    return;
+                }
+                if (string.IsNullOrEmpty(employeeHalfDay))
+                {
+                    MessageBox.Show("Employee's half day is not set. Please select a valid leave type.");
+                    return;
+                }
+
                 List<string> dayNamesBetween = GetDayNamesBetween(startDate, endDate);
 
-                // Count the number of off days in the selected leave period
                 int offDayCount = dayNamesBetween.Count(day => day.Equals(selectedEmployeeOffDay, StringComparison.OrdinalIgnoreCase));
-
                 double halfDayCount = dayNamesBetween.Count(day => day.Equals(selectedEmployeeHalfDay, StringComparison.OrdinalIgnoreCase)) * 0.5;
-
                 double totalLeaveDays = (endDate - startDate).Days + 1;
 
                 leaveRequest.OffDayCount = offDayCount;
                 leaveRequest.HalfDayCount = halfDayCount;
                 leaveRequest.LeavesTaken = totalLeaveDays - (offDayCount + halfDayCount);
 
-                // Store the count of off days in a variable and display in a message box
-                MessageBox.Show($"Off Day Count: {offDayCount}", "Off Day Count");
-
-                // Check if there is only one off day in the leave period, block if true
-                if (offDayCount == 1)
+                LeaveTypeClass leaveTypeClass = new LeaveTypeClass();
+                string availableLeaveStr = leaveTypeClass.GetAvailableLeave(leaveRequest.LeaveType, _currentEmployeeId);
+                if (string.IsNullOrEmpty(availableLeaveStr) || availableLeaveStr == "0")
                 {
-                    MessageBox.Show("Sorry, you cannot request leave on your off day. There is only one off day in the selected period.");
-                    return; // Exit the method if there's a conflict
-                }
-                // If there are multiple off days, allow the leave request to proceed
-                else if (offDayCount > 1)
-                {
-                    MessageBox.Show("Multiple off days detected, leave request allowed.");
+                    MessageBox.Show("Available leave is 0 or not set. Please check the leave type.");
+                    return;
                 }
 
-                // Check if the leave type is "Annual" and validate the date
-                if (leaveRequest.LeaveType == "Annual" && !IsAnnualLeaveValid(startDate, currentDate))
+                int availableLeave = int.Parse(availableLeaveStr);
+                if (leaveRequest.LeavesTaken > availableLeave)
                 {
-                    MessageBox.Show("Annual leave must be requested at least 7 days in advance.");
-                    return; // Exit if annual leave does not meet the 7-day condition
+                    MessageBox.Show("Your leave request exceeds the allowed leave count. Please adjust your leave days.");
+                    return;
                 }
 
-                // No conflicts, proceed to save the leave request
-                leaveRequest.update();
+                leaveRequest.save();
+                leavetype.DeductLeave(leaveRequest.LeaveType, leaveRequest.LeavesTaken);
             }
             catch (Exception ex)
             {
@@ -407,11 +410,49 @@ namespace GrifindoToyLeaveApp
 
         private void LeaveTypeCmb_SelectedIndexChanged(object sender, EventArgs e)
         {
+            //try
+            //{
+            //    if (LeaveTypeCmb.SelectedValue != null)
+            //    {
+            //        // Ensure the selected value is parsed correctly
+            //        int employeeId;
+            //        if (int.TryParse(leaveRequest.LeaType = LeaveTypeCmb.SelectedValue.ToString(), out employeeId))
+            //        {
+            //            // Fetch off day and half day from the Employee Roaster
+            //            (employeeOffDay, employeeHalfDay) = EmpRoas.CalculationDay(employeeId);
+            //            var (startTime, employeeEndTime) = employeeRoaster.GetWorkTimesByEmployeeId(employeeId);
+
+            //            // Show the start time in a message box
+            //            MessageBox.Show($"Employee's Start Time: {startTime}", "Employee Start Time");
+
+            //            if (!string.IsNullOrEmpty(employeeOffDay) && !string.IsNullOrEmpty(employeeHalfDay))
+            //            {
+            //                selectedEmployeeOffDay = employeeOffDay;
+            //                selectedEmployeeHalfDay = employeeHalfDay;
+
+            //                // Display both off day and half day in a single message box
+            //                MessageBox.Show($"Off Day: {employeeOffDay}\nHalf Day: {employeeHalfDay}", "Employee Schedule");
+            //            }
+            //            else
+            //            {
+            //                MessageBox.Show("Could not retrieve employee's off day or half day. Please try again.");
+            //            }
+            //        }
+            //        else
+            //        {
+            //            MessageBox.Show("Invalid employee selected. Please choose a valid employee.");
+            //        }
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    // Show the exception message if something goes wrong
+            //    MessageBox.Show(ex.Message, "Error");
+            //}
             try
             {
                 if (LeaveTypeCmb.SelectedValue != null)
                 {
-                    // Ensure the selected value is parsed correctly
                     int employeeId;
                     if (int.TryParse(leaveRequest.LeaType = LeaveTypeCmb.SelectedValue.ToString(), out employeeId))
                     {
@@ -429,6 +470,9 @@ namespace GrifindoToyLeaveApp
 
                             // Display both off day and half day in a single message box
                             MessageBox.Show($"Off Day: {employeeOffDay}\nHalf Day: {employeeHalfDay}", "Employee Schedule");
+
+                            // Display available leave for the selected employee
+                            DisplayAvailableLeave(employeeId);
                         }
                         else
                         {
