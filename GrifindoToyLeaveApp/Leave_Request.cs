@@ -19,6 +19,7 @@ namespace GrifindoToyLeaveApp
         LeaveRequestClass leaveRequest = new LeaveRequestClass();
         AdminClass admin = new AdminClass();
         LeaveTypeClass leaveType = new LeaveTypeClass();
+        Leave_Type leavetype = new Leave_Type();
         EmployeeClass employee = new EmployeeClass();
         EmpRequestLeaveClass employeeLeave = new EmpRequestLeaveClass();
         EmployeeRoasterClass employeeRoaster = new EmployeeRoasterClass();
@@ -166,6 +167,9 @@ namespace GrifindoToyLeaveApp
 
                 // No conflicts, proceed to save the leave request
                 leaveRequest.save();
+                // Deduct the allowed leave count
+                //LeaveTypeClass leaveTypeManager = new LeaveTypeClass();
+                leavetype.DeductLeave(leaveRequest.LeaveType, leaveRequest.LeavesTaken);
             }
             catch (Exception ex)
             {
